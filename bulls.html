@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bulls&amp;Cows</title>
+  <style type="text/css">
+  .game {margin: 0 auto; width: 400px; height: auto; overflow: auto; background-color: gray; padding: 2px;
+       text-align: center; font-family: sans-serif; font-weight: bold; font-size: 36px;}
+  p {background-color: yellow; margin: 10px;}
+  </style>
+</head>
+<body>
+<script type="text/javascript">
+  function elt(name, attributes) {
+    var node = document.createElement(name);
+    if (attributes)
+      for (var attr in attributes) 
+        if (attributes.hasOwnProperty(attr))
+          node.setAttribute(attr, attributes[attr]);
+    for (var i = 2; i < arguments.length; i++) {
+      var child = arguments[i];
+      if (typeof child == "string") 
+        child = document.createTextNode(child);
+      node.appendChild(child);
+    }
+    return node;
+  }
+
+  function scan(event) {
+    var ch = event.keyCode;    
+    if (ch < 40) event.preventDefault();  
+    if (ch == '13') put('enter');
+    else if (ch == '8') put('backspace');
+    else if (ch > 47 && ch < 58) put(ch - 48);
+    else if (ch > 95 && ch < 106) put(ch - 96);
+  }
+  
+  function put(num) {
+    switch (num) {
+      case 'enter':
+        if (digits.length == 4) check(digits);
+        break;
+      case 'backspace':
+        erase(num);
+        break;
+      default:
+        if (digits.length < 4 && digits.indexOf(num) == -1) 
+          write(num);
+    } 
+  }
+  
+  function write(num) {
+    digits.push(num);
+    p.appendChild(elt("span", null, num.toString()));
+  }
+
+  function erase(num) {
+    var elts = p.children;
+    if (digits.length > 0)
+      p.removeChild(elts[elts.length - 1]);
+    digits.pop();
+  }
+
+  function calculate(n) {
+    var bulls = 0, cows = 0;
+    n.forEach(function(digit, index) {
+      if ((i = problem.indexOf(digit)) > -1)
+        if (i == index) bulls++;
+        else cows++;
+    });
+    return {b: bulls, c: cows};
+  }
+
+  function check(n) {
+    var res = calculate(n);
+    p.appendChild(elt("span", null, " " + res.b, " " + res.c));
+    if (res.b == 4) {
+      var win = game.appendChild(elt("p", null, "You've won!"));
+      game.addEventListener("click", newGame);
+      document.body.removeEventListener("keydown", scan)
+      document.addEventListener("keypress", newGame);      
+      return;
+    }
+    p = game.appendChild(elt("p")); 
+    digits = [];
+  }
+
+  var win = elt("p", null, "You've won!")
+
+  var p, problem, game, digits = [];
+
+  function newGame() {
+    if (game) document.body.removeChild(game);
+    document.removeEventListener("keypress", newGame);
+    digits = [];
+    problem = [];
+    while (problem.length < 4) {
+      var d = ~~(Math.random() * 10);
+      if (!~problem.indexOf(d)) problem.push(d);
+    }
+    console.log(problem.join(""));
+    game = elt("div", {class: "game"});
+    p = game.appendChild(elt("p"));
+    document.body.appendChild(game);
+    document.body.addEventListener("keydown", scan);    
+  }
+
+  newGame();
+</script>
+</body>
+</html>
